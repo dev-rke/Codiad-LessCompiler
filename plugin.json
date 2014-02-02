@@ -2,12 +2,12 @@
     {
         "author" : "rke",
         "version": "0.3",
-        "name" : "Codiad CoffeeScript Compiler",
+        "name" : "Codiad Less Compiler",
         "url" : "",
         "rightbar": [{
-            "action": "codiad.CoffeeScriptCompiler.showDialogWrapper();",
+            "action": "codiad.LessCompiler.showDialogWrapper();",
             "icon": "icon-cup",
-            "title": "CoffeeScript"
+            "title": "Less"
         }]
     }
 ]
