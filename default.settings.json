@@ -1,0 +1,25 @@
+{
+	"less": {
+		"compile_less": true,
+		"depends": false,
+        "compress": false,
+        "cleancss": false,
+        "max_line_len": -1,
+        "optimization": 1,
+        "silent": false,
+        "verbose": false,
+        "lint": false,
+        "paths": [],
+        "color": true,
+        "strictImports": false,
+        "insecure": false,
+        "rootpath": "",
+        "relativeUrls": false,
+        "ieCompat": true,
+        "strictMath": false,
+        "strictUnits": false,
+        "globalVariables": "",
+        "modifyVariables": "",
+        "urlArgs": ""
+	}
+}

@@ -1,0 +1,13 @@
+[
+    {
+        "author" : "rke",
+        "version": "0.3",
+        "name" : "Codiad CoffeeScript Compiler",
+        "url" : "",
+        "rightbar": [{
+            "action": "codiad.CoffeeScriptCompiler.showDialogWrapper();",
+            "icon": "icon-cup",
+            "title": "CoffeeScript"
+        }]
+    }
+]
