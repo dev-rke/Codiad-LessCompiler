@@ -9,11 +9,13 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   codiad.LessCompiler = (function() {
-    var settings;
+    var ignoreSaveEvent, settings;
 
     LessCompiler.instance = null;
 
     settings = null;
+
+    ignoreSaveEvent = false;
 
     /*
     		basic plugin environment initialization
@@ -77,7 +79,9 @@
     LessCompiler.prototype.addSaveHandler = function() {
       var _this = this;
       return this.amplify.subscribe('active.onSave', function() {
-        return _this.compileLessAndSave();
+        if (!_this.ignoreSaveEvent) {
+          return _this.compileLessAndSave();
+        }
       });
     };
 
@@ -132,7 +136,6 @@
           });
           return parser.parse(content, function(err, tree) {
             var compiledContent;
-            console.log(err);
             if (err) {
               throw err;
             }
@@ -153,8 +156,15 @@
 
 
     LessCompiler.prototype.saveFile = function(fileName, fileContent) {
-      var baseDir,
+      var baseDir, instance,
         _this = this;
+      if (instance = this.codiad.active.sessions[fileName]) {
+        instance.setValue(fileContent);
+        this.ignoreSaveEvent = true;
+        this.codiad.active.save(fileName);
+        this.ignoreSaveEvent = false;
+        return;
+      }
       baseDir = this.getBaseDir(fileName);
       if (!this.codiad.filemanager.getType(fileName)) {
         this.jQuery.ajax({

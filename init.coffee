@@ -6,6 +6,7 @@ class codiad.LessCompiler
 	
 	@instance = null
 	settings = null
+	ignoreSaveEvent = false
 	
 	###
 		basic plugin environment initialization
@@ -53,7 +54,8 @@ class codiad.LessCompiler
 	###
 	addSaveHandler: =>
 		@amplify.subscribe('active.onSave', =>
-			@compileLessAndSave()
+            if not @ignoreSaveEvent
+                @compileLessAndSave()
 		)
 		
 		
@@ -96,7 +98,6 @@ class codiad.LessCompiler
                     filename: "workspace/" + currentFile
                 })
                 parser.parse content, (err, tree) =>
-                    console.log err
                     if (err) then throw err
                     compiledContent = tree.toCSS()
                     @codiad.message.success 'Less compiled successfully.'
@@ -114,6 +115,16 @@ class codiad.LessCompiler
 		saves a file, creates one if it does not exist
 	###
 	saveFile: (fileName, fileContent) =>
+		
+		# try to save the file via an opened editor instance, if available
+		if instance = @codiad.active.sessions[fileName]
+			instance.setValue fileContent
+			# temporary disable handling of the save event
+			@ignoreSaveEvent = true
+			@codiad.active.save(fileName)
+			@ignoreSaveEvent = false
+			return
+		
 		
 		baseDir = @getBaseDir fileName
 		
