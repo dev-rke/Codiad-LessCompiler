@@ -111,7 +111,7 @@
 
 
     LessCompiler.prototype.compileLessAndSave = function() {
-      var content, currentFile, editorSession, exception, ext, fileName, options, parser,
+      var content, currentFile, exception, ext, fileName, options, parser,
         _this = this;
       if (!this.settings.less.compile_less) {
         return;
@@ -127,27 +127,22 @@
           generatedFile: this.codiad.filemanager.getShortName(fileName + 'css')
         };
         try {
-          parser = new less.Parser;
+          parser = new less.Parser({
+            filename: "workspace/" + currentFile
+          });
           return parser.parse(content, function(err, tree) {
             var compiledContent;
+            console.log(err);
+            if (err) {
+              throw err;
+            }
             compiledContent = tree.toCSS();
             _this.codiad.message.success('Less compiled successfully.');
             return _this.saveFile(fileName + "css", compiledContent);
           });
         } catch (_error) {
           exception = _error;
-          this.codiad.message.error('Less compilation failed: ' + exception);
-          if (exception.location) {
-            editorSession = this.codiad.active.sessions[currentFile];
-          }
-          editorSession.setAnnotations([
-            {
-              row: exception.location.first_line,
-              column: exception.location.first_column,
-              text: exception.toString(),
-              type: "error"
-            }
-          ]);
+          return this.codiad.message.error('Less compilation failed: ' + exception);
         }
       }
     };
@@ -167,7 +162,7 @@
           success: function(data) {
             var createResponse;
             createResponse = _this.codiad.jsend.parse(data);
-            if (createResponse === !'error') {
+            if (createResponse !== 'error') {
               _this.codiad.filemanager.createObject(path, baseDir, 'file');
               return _this.amplify.publish('filemanager.onCreate', {
                 createPath: baseDir,
@@ -229,7 +224,10 @@
         'compile_less': 'Compile Less on save',
         'generate_sourcemap': 'Generate SourceMap on save',
         'enable_header': 'Enable Less header in compiled file',
-        'enable_bare': 'Compile without a top-level function wrapper'
+        'enable_bare': 'Compile without a top-level function wrapper',
+        'compress': 'Compress css',
+        'ieCompat': 'enable Internet Explorer Compatibility Mode',
+        'cleancss': 'Clean CSS'
       };
       lessRules = (function() {
         var _ref, _results;

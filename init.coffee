@@ -47,6 +47,7 @@ class codiad.LessCompiler
 		@jQuery.getJSON @curpath+"controller.php?action=load", (json) =>
 			@settings = json
 	
+	
 	###
 		Add new compiler procedure to save handler
 	###
@@ -78,24 +79,25 @@ class codiad.LessCompiler
 		with a different file extension
 	###
 	compileLessAndSave: =>
-		return unless @settings.less.compile_less
-		
-		currentFile = @codiad.active.getPath()
-		ext = @codiad.filemanager.getExtension(currentFile)
-		if ext.toLowerCase() is 'less'
-		
-			content = @codiad.editor.getContent()
-			
-			fileName = @getFileNameWithoutExtension(currentFile)
-			
-			options =
-				sourceMap: true
-				sourceFiles: [@codiad.filemanager.getShortName currentFile]
-				generatedFile: @codiad.filemanager.getShortName fileName + 'css'
-			
-			try
-                parser = new less.Parser
+        return unless @settings.less.compile_less
+        currentFile = @codiad.active.getPath()
+        ext = @codiad.filemanager.getExtension(currentFile)
+        if ext.toLowerCase() is 'less'
+            content = @codiad.editor.getContent()
+            fileName = @getFileNameWithoutExtension(currentFile)
+            options =
+                sourceMap: true
+                sourceFiles: [@codiad.filemanager.getShortName currentFile]
+                generatedFile: @codiad.filemanager.getShortName fileName + 'css'
+            try
+                parser = new(less.Parser)({
+                	# Use workspace to get the "absolute" path of the file
+                	# to load additional import files automatically by less loader.
+                    filename: "workspace/" + currentFile
+                })
                 parser.parse content, (err, tree) =>
+                    console.log err
+                    if (err) then throw err
                     compiledContent = tree.toCSS()
                     @codiad.message.success 'Less compiled successfully.'
                     #if @settings.less.generate_sourcemap
@@ -103,21 +105,12 @@ class codiad.LessCompiler
                     #    compiledJS = "//# sourceMappingURL=#{sourceMapFileName}\n" + compiledJS
                     #    @saveFile fileName + "map", compiledContent?.v3SourceMap
                     @saveFile fileName + "css", compiledContent
-			catch exception
-				# show error message and editor annotation
-				@codiad.message.error 'Less compilation failed: ' + exception
-				if exception.location
-                    editorSession = @codiad.active.sessions[currentFile]
-					editorSession.setAnnotations([
-						row:    exception.location.first_line
-						column: exception.location.first_column
-						text:   exception.toString()
-						type:   "error"
-					])
-				return
-		
+            catch exception
+                # show error message and editor annotation
+                @codiad.message.error 'Less compilation failed: ' + exception
 	
-	###
+	
+    ###
 		saves a file, creates one if it does not exist
 	###
 	saveFile: (fileName, fileContent) =>
@@ -131,7 +124,7 @@ class codiad.LessCompiler
 					 fileName + '&type=file'
 				success: (data) =>
 					createResponse = @codiad.jsend.parse data
-					if createResponse is not 'error'
+					if createResponse isnt 'error'
 						@codiad.filemanager.createObject path, baseDir, 'file'
 						# Notify listeners.
 						@amplify.publish('filemanager.onCreate'
@@ -183,6 +176,10 @@ class codiad.LessCompiler
 			'generate_sourcemap': 'Generate SourceMap on save'
 			'enable_header': 'Enable Less header in compiled file'
 			'enable_bare': 'Compile without a top-level function wrapper'
+			'compress' : 'Compress css'
+			'ieCompat' : 'enable Internet Explorer Compatibility Mode'
+			'cleancss' : 'Clean CSS'
+			
 		
 		lessRules = for name,value of @settings.less
 			label = lessLabels[name]

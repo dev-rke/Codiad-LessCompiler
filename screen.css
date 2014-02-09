@@ -1,0 +1,10 @@
+#less-settings h2 {
+  font-size: 1em;
+}
+#less-settings input {
+  display: inline-block;
+}
+#less-settings label {
+  display: inline-block;
+  font-size: 0.85em;
+}
