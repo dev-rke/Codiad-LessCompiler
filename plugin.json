@@ -6,7 +6,7 @@
         "url" : "",
         "rightbar": [{
             "action": "codiad.LessCompiler.showDialogWrapper();",
-            "icon": "icon-cup",
+            "icon": "icon-cog",
             "title": "Less"
         }]
     }
