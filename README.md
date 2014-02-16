@@ -1,4 +1,5 @@
 Codiad-LessCompiler
+<<<<<<< HEAD
 ===========================
 
 Less compiler plugin for Codiad-IDE
@@ -12,3 +13,8 @@ Installation
 ============
 
 	Download the zip file and extract it to your plugins folder
+=======
+===================
+
+Less Compiler Plugin for Codiad IDE
+>>>>>>> 4199a8cef4c67c0ed07612777630096407ebd2dd
