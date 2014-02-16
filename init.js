@@ -64,7 +64,10 @@
     LessCompiler.prototype.preloadLibrariesAndSettings = function() {
       var _this = this;
       if (typeof window.Less === 'undefined') {
-        this.jQuery.loadScript(this.curpath + "less-1.6.1.min.js");
+        this.jQuery.loadScript(this.curpath + "less-1.6.3.min.js");
+      }
+      if (typeof window.sourceMap === 'undefined') {
+        this.jQuery.loadScript(this.curpath + "source-map-0.1.31.js");
       }
       return this.jQuery.getJSON(this.curpath + "controller.php?action=load", function(json) {
         return _this.settings = json;
@@ -125,35 +128,39 @@
       if (ext.toLowerCase() === 'less') {
         content = this.codiad.editor.getContent();
         fileName = this.getFileNameWithoutExtension(currentFile);
-        options = {
-          sourceMap: true,
-          sourceFiles: [this.codiad.filemanager.getShortName(currentFile)],
-          generatedFile: this.codiad.filemanager.getShortName(fileName + 'css')
-        };
+        options = this.settings.less;
+        options.filename = this.codiad.filemanager.getShortName(currentFile);
+        if (this.settings.less.sourceMap) {
+          options.sourceMapOutputFilename = this.codiad.filemanager.getShortName(fileName + "map");
+          options.sourceMapURL = options.sourceMapOutputFilename;
+          options.sourceMapGenerator = sourceMap.SourceMapGenerator;
+          options.writeSourceMap = function(output) {
+            return _this.saveFile(fileName + "map", output);
+          };
+        }
         try {
-          parser = new less.Parser({
-            filename: "workspace/" + currentFile
-          });
+          parser = new less.Parser(options);
+          window.lessoptions = options;
           return parser.parse(content, function(err, tree) {
             var compiledContent;
             if (err) {
               throw err;
             }
-            compiledContent = tree.toCSS();
+            window.lesstree = tree;
+            compiledContent = tree.toCSS(options);
             _this.codiad.message.success('Less compiled successfully.');
             return _this.saveFile(fileName + "css", compiledContent);
           });
         } catch (_error) {
           exception = _error;
           return this.codiad.message.error('Less compilation failed: ' + exception);
+          /*
+          		saves a file, creates one if it does not exist
+          */
+
         }
       }
     };
-
-    /*
-    		saves a file, creates one if it does not exist
-    */
-
 
     LessCompiler.prototype.saveFile = function(fileName, fileContent) {
       var baseDir, instance,
@@ -237,7 +244,8 @@
         'enable_bare': 'Compile without a top-level function wrapper',
         'compress': 'Compress css',
         'ieCompat': 'enable Internet Explorer Compatibility Mode',
-        'cleancss': 'Clean CSS'
+        'cleancss': 'Clean CSS',
+        'sourceMap': 'generate SourceMap'
       };
       lessRules = (function() {
         var _ref, _results;
@@ -246,6 +254,9 @@
         for (name in _ref) {
           value = _ref[name];
           label = lessLabels[name];
+          if (!label) {
+            continue;
+          }
           _results.push(generateCheckbox(name, label, value));
         }
         return _results;

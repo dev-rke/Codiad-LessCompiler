@@ -42,7 +42,10 @@ class codiad.LessCompiler
 	preloadLibrariesAndSettings: =>
 		# Less Preload Helper
 		if typeof(window.Less) is 'undefined'
-			@jQuery.loadScript @curpath + "less-1.6.1.min.js"
+			@jQuery.loadScript @curpath + "less-1.6.3.min.js"
+			
+		if typeof(window.sourceMap) is 'undefined'
+		    @jQuery.loadScript @curpath + "source-map-0.1.31.js"
 			
 		# load settings
 		@jQuery.getJSON @curpath+"controller.php?action=load", (json) =>
@@ -81,34 +84,40 @@ class codiad.LessCompiler
 		with a different file extension
 	###
 	compileLessAndSave: =>
-        return unless @settings.less.compile_less
-        currentFile = @codiad.active.getPath()
-        ext = @codiad.filemanager.getExtension(currentFile)
-        if ext.toLowerCase() is 'less'
-            content = @codiad.editor.getContent()
-            fileName = @getFileNameWithoutExtension(currentFile)
-            options =
-                sourceMap: true
-                sourceFiles: [@codiad.filemanager.getShortName currentFile]
-                generatedFile: @codiad.filemanager.getShortName fileName + 'css'
-            try
-                parser = new(less.Parser)({
-                	# Use workspace to get the "absolute" path of the file
-                	# to load additional import files automatically by less loader.
-                    filename: "workspace/" + currentFile
-                })
-                parser.parse content, (err, tree) =>
+		return unless @settings.less.compile_less
+		currentFile = @codiad.active.getPath()
+		ext = @codiad.filemanager.getExtension(currentFile)
+		if ext.toLowerCase() is 'less'
+			content = @codiad.editor.getContent()
+			fileName = @getFileNameWithoutExtension(currentFile)
+			
+			options = @settings.less
+			# Use workspace to get the "absolute" path of the file
+			# to load additional import files automatically by less loader.
+			options.filename = @codiad.filemanager.getShortName currentFile
+			if @settings.less.sourceMap
+				options.sourceMapOutputFilename = @codiad.filemanager.getShortName fileName + "map"
+				options.sourceMapURL = options.sourceMapOutputFilename
+				options.sourceMapGenerator = sourceMap.SourceMapGenerator
+				options.writeSourceMap = (output) =>
+                    @saveFile fileName + "map", output
+			
+			#options =
+                #sourceMap: true
+                #sourceFiles: [@codiad.filemanager.getShortName currentFile]
+                #generatedFile: @codiad.filemanager.getShortName fileName + 'css'
+			try
+				parser = new(less.Parser)(options)
+				window.lessoptions = options
+				parser.parse content, (err, tree) =>
                     if (err) then throw err
-                    compiledContent = tree.toCSS()
+                    window.lesstree = tree
+                    compiledContent = tree.toCSS(options)
                     @codiad.message.success 'Less compiled successfully.'
-                    #if @settings.less.generate_sourcemap
-                    #    sourceMapFileName = @codiad.filemanager.getShortName fileName + "map"
-                    #    compiledJS = "//# sourceMappingURL=#{sourceMapFileName}\n" + compiledJS
-                    #    @saveFile fileName + "map", compiledContent?.v3SourceMap
                     @saveFile fileName + "css", compiledContent
-            catch exception
-                # show error message and editor annotation
-                @codiad.message.error 'Less compilation failed: ' + exception
+			catch exception
+				# show error message and editor annotation
+				@codiad.message.error 'Less compilation failed: ' + exception
 	
 	
     ###
@@ -190,10 +199,12 @@ class codiad.LessCompiler
 			'compress' : 'Compress css'
 			'ieCompat' : 'enable Internet Explorer Compatibility Mode'
 			'cleancss' : 'Clean CSS'
+			'sourceMap' : 'generate SourceMap'
 			
 		
 		lessRules = for name,value of @settings.less
 			label = lessLabels[name]
+			if not label then continue
 			generateCheckbox name, label, value
         
 		html = """
