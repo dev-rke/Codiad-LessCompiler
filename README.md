@@ -12,8 +12,8 @@ Installation
 ============
 
 	Download the zip file and extract it to your plugins folder
-	
-	
+
+
 Update 2014/02/16:
 ==================
 
