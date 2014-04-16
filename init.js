@@ -39,6 +39,7 @@
       this.scripts = document.getElementsByTagName('script');
       this.path = this.scripts[this.scripts.length - 1].src.split('?')[0];
       this.curpath = this.path.split('/').slice(0, -1).join('/') + '/';
+      this.workspaceUrl = 'workspace/';
       LessCompiler.instance = this;
       this.jQuery(function() {
         return _this.init();
@@ -64,13 +65,16 @@
     LessCompiler.prototype.preloadLibrariesAndSettings = function() {
       var _this = this;
       if (typeof window.Less === 'undefined') {
-        this.jQuery.loadScript(this.curpath + "less-1.6.3.min.js");
+        this.jQuery.loadScript(this.curpath + "less-1.7.0.min.js");
       }
       if (typeof window.sourceMap === 'undefined') {
         this.jQuery.loadScript(this.curpath + "source-map-0.1.31.js");
       }
-      return this.jQuery.getJSON(this.curpath + "controller.php?action=load", function(json) {
+      this.jQuery.getJSON(this.curpath + "controller.php?action=load", function(json) {
         return _this.settings = json;
+      });
+      return this.jQuery.getJSON(this.curpath + "controller.php?action=getWorkspaceUrl", function(json) {
+        return _this.workspaceUrl = json.workspaceUrl;
       });
     };
 
@@ -129,9 +133,9 @@
         content = this.codiad.editor.getContent();
         fileName = this.getFileNameWithoutExtension(currentFile);
         options = this.settings.less;
-        options.filename = this.codiad.filemanager.getShortName(currentFile);
+        options.filename = this.workspaceUrl + currentFile;
         if (this.settings.less.sourceMap) {
-          options.sourceMapOutputFilename = this.codiad.filemanager.getShortName(fileName + "map");
+          options.sourceMapOutputFilename = this.codiad.filemanager.getShortName(fileName) + "map";
           options.sourceMapURL = options.sourceMapOutputFilename;
           options.sourceMapGenerator = sourceMap.SourceMapGenerator;
           options.writeSourceMap = function(output) {
@@ -173,6 +177,7 @@
         return;
       }
       baseDir = this.getBaseDir(fileName);
+      this.codiad.filemanager.rescan(baseDir);
       if (!this.codiad.filemanager.getType(fileName)) {
         this.jQuery.ajax({
           url: this.codiad.filemanager.controller + '?action=create&path=' + fileName + '&type=file',

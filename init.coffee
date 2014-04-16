@@ -20,6 +20,9 @@ class codiad.LessCompiler
 		@path = @scripts[@scripts.length - 1].src.split('?')[0]
 		@curpath = @path.split('/').slice(0, -1).join('/') + '/'
 		
+		# init default workspace path
+		@workspaceUrl = 'workspace/'
+		
 		LessCompiler.instance = @
 		
 		# wait until dom is loaded
@@ -42,7 +45,7 @@ class codiad.LessCompiler
 	preloadLibrariesAndSettings: =>
 		# Less Preload Helper
 		if typeof(window.Less) is 'undefined'
-			@jQuery.loadScript @curpath + "less-1.6.3.min.js"
+			@jQuery.loadScript @curpath + "less-1.7.0.min.js"
 			
 		if typeof(window.sourceMap) is 'undefined'
 		    @jQuery.loadScript @curpath + "source-map-0.1.31.js"
@@ -50,6 +53,10 @@ class codiad.LessCompiler
 		# load settings
 		@jQuery.getJSON @curpath+"controller.php?action=load", (json) =>
 			@settings = json
+	
+	    # load workspace path from config
+		@jQuery.getJSON @curpath+"controller.php?action=getWorkspaceUrl", (json) =>
+		    @workspaceUrl = json.workspaceUrl
 	
 	
 	###
@@ -92,16 +99,17 @@ class codiad.LessCompiler
 			fileName = @getFileNameWithoutExtension(currentFile)
 			
 			options = @settings.less
-			# Use workspace to get the "absolute" path of the file
-			# to load additional import files automatically by less loader.
-			options.filename = @codiad.filemanager.getShortName currentFile
+			
+			options.filename = @workspaceUrl + currentFile
 			if @settings.less.sourceMap
-				options.sourceMapOutputFilename = @codiad.filemanager.getShortName fileName + "map"
+				options.sourceMapOutputFilename = @codiad.filemanager.getShortName(fileName) + "map"
 				options.sourceMapURL = options.sourceMapOutputFilename
 				options.sourceMapGenerator = sourceMap.SourceMapGenerator
+				
 				options.writeSourceMap = (output) =>
                     @saveFile fileName + "map", output
 			
+			# TODO: implement short names for source maps
 			#options =
                 #sourceMap: true
                 #sourceFiles: [@codiad.filemanager.getShortName currentFile]
@@ -136,6 +144,7 @@ class codiad.LessCompiler
 		
 		
 		baseDir = @getBaseDir fileName
+		@codiad.filemanager.rescan baseDir
 		
 		# create new node for file save if file does not exist, do it not async
 		if not @codiad.filemanager.getType fileName

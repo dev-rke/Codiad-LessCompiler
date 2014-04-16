@@ -1,16 +1,12 @@
 {
 	"less": {
 		"compile_less": true,
-		"depends": false,
         "compress": false,
         "cleancss": false,
         "color": true,
-        "strictImports": false,
         "insecure": false,
         "rootpath": "",
-        "relativeUrls": false,
         "ieCompat": true,
-        "strictMath": false,
-        "strictUnits": false
+        "sourceMap" : false
 	}
 }

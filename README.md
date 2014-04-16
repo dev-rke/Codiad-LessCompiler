@@ -14,7 +14,12 @@ Installation
 	Download the zip file and extract it to your plugins folder
 
 
-Update 2014/02/16:
-==================
+Changelog
+=========
 
-integrated sourcemap option from mozilla that is also used by lessc.
+v0.4 - 2014/04/16
+- updated less compiler to 1.7.0
+- fixed bug when less imports can't be resolved due to a wrong workspace path
+
+v0.3 - 2014/02/16
+- integrated sourcemap option from mozilla that is also used by lessc.

@@ -1,12 +1,8 @@
 <?php
 
 /*
- * Copyright (c) Codiad & Andr3as, distributed
- * as-is and without warranty under the MIT License. 
- * See http://opensource.org/licenses/MIT for more information.
- * This information must remain intact.
- */
-//error_reporting(0);
+	Copyright (c) 2013 - 2014, RKE
+*/
 
 
 require_once('../../common.php');
@@ -31,6 +27,13 @@ switch($_GET['action']) {
         } else {
             echo file_get_contents("default.settings.json");
         }
+        break;
+        
+    case 'getWorkspaceUrl':
+        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        echo json_encode(array(
+            'workspaceUrl' => $protocol.WSURL.'/',
+        ));
         break;
         
     default:
