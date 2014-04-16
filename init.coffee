@@ -118,61 +118,62 @@ class codiad.LessCompiler
 				parser = new(less.Parser)(options)
 				window.lessoptions = options
 				parser.parse content, (err, tree) =>
-                    if (err) then throw err
-                    window.lesstree = tree
-                    compiledContent = tree.toCSS(options)
-                    @codiad.message.success 'Less compiled successfully.'
-                    @saveFile fileName + "css", compiledContent
+					if err
+						throw err
+					@saveFile fileName + "css", tree.toCSS(options)
+					@codiad.message.success 'Less compiled successfully.'
 			catch exception
 				# show error message and editor annotation
 				@codiad.message.error 'Less compilation failed: ' + exception
-	
-	
-    ###
+			
+	###
 		saves a file, creates one if it does not exist
 	###
 	saveFile: (fileName, fileContent) =>
 		
-		# try to save the file via an opened editor instance, if available
-		if instance = @codiad.active.sessions[fileName]
-			instance.setValue fileContent
-			# temporary disable handling of the save event
-			@ignoreSaveEvent = true
-			@codiad.active.save(fileName)
-			@ignoreSaveEvent = false
-			return
-		
-		
-		baseDir = @getBaseDir fileName
-		@codiad.filemanager.rescan baseDir
-		
-		# create new node for file save if file does not exist, do it not async
-		if not @codiad.filemanager.getType fileName
-			@jQuery.ajax(
-				url: @codiad.filemanager.controller + '?action=create&path=' +
-					 fileName + '&type=file'
-				success: (data) =>
-					createResponse = @codiad.jsend.parse data
-					if createResponse isnt 'error'
-						@codiad.filemanager.createObject path, baseDir, 'file'
-						# Notify listeners.
-						@amplify.publish('filemanager.onCreate'
-							createPath: baseDir
-							path:       path
-							shortName:  fileName
-							type:       'file'
-						)
-				async: false
+		try
+			
+			# try to save the file via an opened editor instance, if available
+			if instance = @codiad.active.sessions[fileName]
+				instance.setValue fileContent
+				# temporary disable handling of the save event
+				@ignoreSaveEvent = true
+				@codiad.active.save(fileName)
+				@ignoreSaveEvent = false
+				return
+			
+			
+			baseDir = @getBaseDir fileName
+			#@codiad.filemanager.rescan baseDir
+			
+			# create new node for file save if file does not exist, do it not async
+			if not @codiad.filemanager.getType fileName
+				@jQuery.ajax(
+					url: @codiad.filemanager.controller + '?action=create&path=' +
+						 fileName + '&type=file'
+					success: (data) =>
+						createResponse = @codiad.jsend.parse data
+						if createResponse isnt 'error'
+							shortName = @codiad.filemanager.getShortName(fileName)
+							@codiad.filemanager.createObject baseDir, fileName, 'file'
+							# Notify listeners.
+							@amplify.publish('filemanager.onCreate'
+								createPath: fileName
+								path:       baseDir
+								shortName:  shortName
+								type:       'file'
+							)
+					async: false
+				)
+				
+			# save compiled javascript to new filename in the same directory
+			@codiad.filemanager.saveFile(fileName, fileContent,
+				error: =>
+					@codiad.message.error 'Cannot save file.'
 			)
 			
-		# save compiled javascript to new filename in the same directory
-		@codiad.filemanager.saveFile(fileName, fileContent,
-			success: =>
-				# rescan current folder
-				@codiad.filemanager.rescan baseDir
-			error: =>
-				@codiad.message.error 'Cannot save file.'
-		)
+		catch exception
+			@codiad.message.error 'Cannot save file: ' + exception
 	
 	
 	###

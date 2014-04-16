@@ -17,6 +17,9 @@ Installation
 Changelog
 =========
 
+v0.5 - 2014/04/16
+- improved file save handling
+
 v0.4 - 2014/04/16
 - updated less compiler to 1.7.0
 - fixed bug when less imports can't be resolved due to a wrong workspace path

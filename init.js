@@ -146,65 +146,65 @@
           parser = new less.Parser(options);
           window.lessoptions = options;
           return parser.parse(content, function(err, tree) {
-            var compiledContent;
             if (err) {
               throw err;
             }
-            window.lesstree = tree;
-            compiledContent = tree.toCSS(options);
-            _this.codiad.message.success('Less compiled successfully.');
-            return _this.saveFile(fileName + "css", compiledContent);
+            _this.saveFile(fileName + "css", tree.toCSS(options));
+            return _this.codiad.message.success('Less compiled successfully.');
           });
         } catch (_error) {
           exception = _error;
           return this.codiad.message.error('Less compilation failed: ' + exception);
-          /*
-          		saves a file, creates one if it does not exist
-          */
-
         }
       }
     };
 
+    /*
+    		saves a file, creates one if it does not exist
+    */
+
+
     LessCompiler.prototype.saveFile = function(fileName, fileContent) {
-      var baseDir, instance,
+      var baseDir, exception, instance,
         _this = this;
-      if (instance = this.codiad.active.sessions[fileName]) {
-        instance.setValue(fileContent);
-        this.ignoreSaveEvent = true;
-        this.codiad.active.save(fileName);
-        this.ignoreSaveEvent = false;
-        return;
-      }
-      baseDir = this.getBaseDir(fileName);
-      this.codiad.filemanager.rescan(baseDir);
-      if (!this.codiad.filemanager.getType(fileName)) {
-        this.jQuery.ajax({
-          url: this.codiad.filemanager.controller + '?action=create&path=' + fileName + '&type=file',
-          success: function(data) {
-            var createResponse;
-            createResponse = _this.codiad.jsend.parse(data);
-            if (createResponse !== 'error') {
-              _this.codiad.filemanager.createObject(path, baseDir, 'file');
-              return _this.amplify.publish('filemanager.onCreate', {
-                createPath: baseDir,
-                path: path,
-                shortName: fileName,
-                type: 'file'
-              });
-            }
-          },
-          async: false
-        });
-      }
-      return this.codiad.filemanager.saveFile(fileName, fileContent, {
-        success: function() {
-          return _this.codiad.filemanager.rescan(baseDir);
-        },
-        error: function() {
-          return _this.codiad.message.error('Cannot save file.');
+      try {
+        if (instance = this.codiad.active.sessions[fileName]) {
+          instance.setValue(fileContent);
+          this.ignoreSaveEvent = true;
+          this.codiad.active.save(fileName);
+          this.ignoreSaveEvent = false;
+          return;
         }
-      });
+        baseDir = this.getBaseDir(fileName);
+        if (!this.codiad.filemanager.getType(fileName)) {
+          this.jQuery.ajax({
+            url: this.codiad.filemanager.controller + '?action=create&path=' + fileName + '&type=file',
+            success: function(data) {
+              var createResponse, shortName;
+              createResponse = _this.codiad.jsend.parse(data);
+              if (createResponse !== 'error') {
+                shortName = _this.codiad.filemanager.getShortName(fileName);
+                _this.codiad.filemanager.createObject(baseDir, fileName, 'file');
+                return _this.amplify.publish('filemanager.onCreate', {
+                  createPath: fileName,
+                  path: baseDir,
+                  shortName: shortName,
+                  type: 'file'
+                });
+              }
+            },
+            async: false
+          });
+        }
+        return this.codiad.filemanager.saveFile(fileName, fileContent, {
+          error: function() {
+            return _this.codiad.message.error('Cannot save file.');
+          }
+        });
+      } catch (_error) {
+        exception = _error;
+        return this.codiad.message.error('Cannot save file: ' + exception);
+      }
     };
 
     /*
