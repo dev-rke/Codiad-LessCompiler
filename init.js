@@ -234,7 +234,7 @@
      */
 
     LessCompiler.prototype.getFileNameWithoutExtension = function(filepath) {
-      return filepath.substr(0, filepath.indexOf(".") + 1);
+      return filepath.substr(0, filepath.lastIndexOf(".") + 1);
     };
 
 

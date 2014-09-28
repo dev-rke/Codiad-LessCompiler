@@ -187,7 +187,7 @@ class codiad.LessCompiler
 		Get filename without file extension of a file
 	###
 	getFileNameWithoutExtension: (filepath) =>
-		filepath.substr 0, filepath.indexOf(".") + 1
+		filepath.substr 0, filepath.lastIndexOf(".") + 1
 	
 	
 	###
