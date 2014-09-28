@@ -45,7 +45,7 @@ class codiad.LessCompiler
 	preloadLibrariesAndSettings: =>
 		# Less Preload Helper
 		if typeof(window.Less) is 'undefined'
-			@jQuery.loadScript @curpath + "less-1.7.0.min.js"
+			@jQuery.loadScript @curpath + "less-1.7.5.min.js"
 			
 		if typeof(window.sourceMap) is 'undefined'
 		    @jQuery.loadScript @curpath + "source-map-0.1.31.js"
