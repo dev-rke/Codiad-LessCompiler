@@ -17,6 +17,10 @@ Installation
 Changelog
 =========
 
+v0.5.1 - 2014/09/28
+- updated less compiler to 1.7.5
+- fixed bug #2 getFileNameWithoutExtension: using lastIndexOf instead of indexOf
+
 v0.5 - 2014/04/16
 - improved file save handling
 
