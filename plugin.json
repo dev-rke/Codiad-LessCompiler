@@ -1,7 +1,7 @@
 [
     {
         "author" : "rke",
-        "version": "0.5.1",
+        "version": "0.5.2",
         "name" : "Less Compiler",
         "url" : "https://github.com/dev-rke/Codiad-LessCompiler",
         "rightbar": [{
