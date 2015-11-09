@@ -64,7 +64,7 @@
      */
 
     LessCompiler.prototype.preloadLibrariesAndSettings = function() {
-      if (typeof window.Less === 'undefined') {
+      if (typeof window.less === 'undefined') {
         this.jQuery.loadScript(this.curpath + "less.min.js");
       }
       if (typeof window.sourceMap === 'undefined') {
@@ -128,36 +128,26 @@
      */
 
     LessCompiler.prototype.compileLessAndSave = function() {
-      var content, currentFile, error, exception, ext, fileName, options, parser;
+      var content, currentFile, error, exception, ext, fileName, options;
       if (!this.settings.less.compile_less) {
         return;
       }
       currentFile = this.codiad.active.getPath();
+      console.log(currentFile);
       ext = this.codiad.filemanager.getExtension(currentFile);
       if (ext.toLowerCase() === 'less') {
         content = this.codiad.editor.getContent();
         fileName = this.getFileNameWithoutExtension(currentFile);
         options = this.settings.less;
         options.filename = this.workspaceUrl + currentFile;
-        if (this.settings.less.sourceMap) {
-          options.sourceMapOutputFilename = this.codiad.filemanager.getShortName(fileName) + "map";
-          options.sourceMapURL = options.sourceMapOutputFilename;
-          options.sourceMapGenerator = sourceMap.SourceMapGenerator;
-          options.writeSourceMap = (function(_this) {
-            return function(output) {
-              return _this.saveFile(fileName + "map", output);
-            };
-          })(this);
-        }
         try {
-          parser = new less.Parser(options);
           window.lessoptions = options;
-          return parser.parse(content, (function(_this) {
-            return function(err, tree) {
+          return less.render(content, options, (function(_this) {
+            return function(err, output) {
               if (err) {
                 throw err;
               }
-              _this.saveFile(fileName + "css", tree.toCSS(options));
+              _this.saveFile(fileName + "css", output.css);
               return _this.codiad.message.success('Less compiled successfully.');
             };
           })(this));
@@ -257,13 +247,8 @@
       })(this);
       lessLabels = {
         'compile_less': 'Compile Less on save',
-        'generate_sourcemap': 'Generate SourceMap on save',
-        'enable_header': 'Enable Less header in compiled file',
-        'enable_bare': 'Compile without a top-level function wrapper',
         'compress': 'Compress css',
-        'ieCompat': 'enable Internet Explorer Compatibility Mode',
-        'cleancss': 'Clean CSS',
-        'sourceMap': 'generate SourceMap'
+        'ieCompat': 'enable Internet Explorer Compatibility Mode'
       };
       lessRules = (function() {
         var ref, results;

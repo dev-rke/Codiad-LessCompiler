@@ -44,7 +44,7 @@ class codiad.LessCompiler
 	###
 	preloadLibrariesAndSettings: =>
 		# Less Preload Helper
-		if typeof(window.Less) is 'undefined'
+		if typeof(window.less) is 'undefined'
 			@jQuery.loadScript @curpath + "less.min.js"
 			
 		if typeof(window.sourceMap) is 'undefined'
@@ -93,6 +93,7 @@ class codiad.LessCompiler
 	compileLessAndSave: =>
 		return unless @settings.less.compile_less
 		currentFile = @codiad.active.getPath()
+		console.log(currentFile)
 		ext = @codiad.filemanager.getExtension(currentFile)
 		if ext.toLowerCase() is 'less'
 			content = @codiad.editor.getContent()
@@ -101,26 +102,28 @@ class codiad.LessCompiler
 			options = @settings.less
 			
 			options.filename = @workspaceUrl + currentFile
-			if @settings.less.sourceMap
-				options.sourceMapOutputFilename = @codiad.filemanager.getShortName(fileName) + "map"
-				options.sourceMapURL = options.sourceMapOutputFilename
-				options.sourceMapGenerator = sourceMap.SourceMapGenerator
-				
-				options.writeSourceMap = (output) =>
-                    @saveFile fileName + "map", output
+			
+			# disabled sourcemap support since less 2.x does not support it in the browser furthermore
+			#if @settings.less.sourceMap
+			#	options.sourceMapOutputFilename = @codiad.filemanager.getShortName(fileName) + "map"
+			#	options.sourceMapURL = options.sourceMapOutputFilename
+			#	options.sourceMapGenerator = sourceMap.SourceMapGenerator
+			#	
+			#	options.writeSourceMap = (output) =>
+			#		@saveFile fileName + "map", output
 			
 			# TODO: implement short names for source maps
 			#options =
                 #sourceMap: true
                 #sourceFiles: [@codiad.filemanager.getShortName currentFile]
                 #generatedFile: @codiad.filemanager.getShortName fileName + 'css'
+			
 			try
-				parser = new(less.Parser)(options)
 				window.lessoptions = options
-				parser.parse content, (err, tree) =>
+				less.render content, options, (err, output) =>
 					if err
 						throw err
-					@saveFile fileName + "css", tree.toCSS(options)
+					@saveFile fileName + "css", output.css
 					@codiad.message.success 'Less compiled successfully.'
 			catch exception
 				# show error message and editor annotation
@@ -203,13 +206,9 @@ class codiad.LessCompiler
 		
 		lessLabels =
 			'compile_less': 'Compile Less on save'
-			'generate_sourcemap': 'Generate SourceMap on save'
-			'enable_header': 'Enable Less header in compiled file'
-			'enable_bare': 'Compile without a top-level function wrapper'
 			'compress' : 'Compress css'
 			'ieCompat' : 'enable Internet Explorer Compatibility Mode'
-			'cleancss' : 'Clean CSS'
-			'sourceMap' : 'generate SourceMap'
+			#'sourceMap' : 'generate SourceMap'
 			
 		
 		lessRules = for name,value of @settings.less
