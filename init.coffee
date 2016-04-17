@@ -1,5 +1,5 @@
 ###
-	Copyright (c) 2013 - 2015, dev-rke
+	Copyright (c) 2013, dev-rke
 ###
 
 class codiad.LessCompiler
@@ -74,7 +74,9 @@ class codiad.LessCompiler
 	###
 	addOpenHandler: =>
 		@amplify.subscribe('active.onOpen', =>
-			manager = @codiad.editor.getActive().commands
+			editorInstance = @codiad.editor.getActive()
+			return if not editorInstance
+			manager = editorInstance.commands
 			manager.addCommand(
 				name: "Compile Less"
 				bindKey:

@@ -1,21 +1,19 @@
-Codiad-LessCompiler
+LessCompiler
 ===========================
 
-Less compiler plugin for Codiad-IDE
+Less compiler plugin for Codiad-IDE.
 
 This plugin compiles the current Less file on each save.
 See http://lesscss.org/ for the Less compiler.
 
 Compilation and Linting is completely done in the browser, so there are no further dependencies.
 
-Installation
-============
-
-	Download the zip file and extract it to your plugins folder
-
 
 Changelog
 =========
+
+v0.5.3 - 2016/04/17
+- fixed an initialization issue
 
 v0.5.2 - 2015/11/09
 - updated less compiler to 2.5.3
@@ -34,3 +32,19 @@ v0.4 - 2014/04/16
 
 v0.3 - 2014/02/16
 - integrated sourcemap option from mozilla that is also used by lessc.
+
+
+License
+=======
+
+The MIT License (MIT)
+
+Copyright (c) 2014 dev-rke
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
